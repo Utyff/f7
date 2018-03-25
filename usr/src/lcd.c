@@ -14,16 +14,20 @@ u16 BACK_COLOR = 0xFFFF;  // background color
 // Management LCD important parameters
 _lcd_dev lcddev;
 
+
+void LCD_Init_sequence();
+
+
 // Set the cursor position
 //Xpos: abscissa
 //Ypos: ordinate
-void LCD_SetCursor(u16 Xpos, u16 Ypos) {
+void LCD_SetCursor(u16 x, u16 y) {
     LCD_WR_REG(LCD_SET_X);
-    LCD_WR_DATA(Xpos >> 8);
-    LCD_WR_DATA(Xpos & (u16) 0XFF);
+    LCD_WR_DATA(x >> 8);
+    LCD_WR_DATA(x & (u16) 0XFF);
     LCD_WR_REG(LCD_SET_Y);
-    LCD_WR_DATA(Ypos >> 8);
-    LCD_WR_DATA(Ypos & (u16) 0XFF);
+    LCD_WR_DATA(y >> 8);
+    LCD_WR_DATA(y & (u16) 0XFF);
 }
 
 // Set the window, and automatically sets the upper left corner of the window to draw point coordinates (sx,sy).
@@ -173,7 +177,7 @@ void LCD_Fast_DrawPoint(u16 x, u16 y, u16 color) {
     LCD_WR_DATA(y >> 8);
     LCD_WR_DATA(y & (u16) 0XFF);
 
-    LCD_WR_REG(LCD_WR_RAM_CMD);
+    LCD_WriteRAM_Prepare();    // Start writing GRAM
     LCD_WR_DATA(color);
 }
 
@@ -223,6 +227,13 @@ void LCD_Init(void) {
     sprintf(buf, "\n LCD ID: %x\n", lcddev.id);
     DBG_Trace((uint8_t*)buf);
 
+    LCD_Init_sequence();
+
+    LCD_Display_Dir(1);  // default to portrait
+    LCD_Clear(GREEN);
+}
+
+void LCD_Init_sequence() {
     LCD_WR_REG(0xCF);
     LCD_WR_DATA(0x00);
     LCD_WR_DATA(0xC1);
@@ -315,9 +326,6 @@ void LCD_Init(void) {
     LCD_WR_REG(0x11); //Exit Sleep
     delay_ms(120);
     LCD_WR_REG(0x29); //display on
-
-    LCD_Display_Dir(1);  // default to portrait
-    LCD_Clear(GREEN);
 }
 
 // Clear screen function
