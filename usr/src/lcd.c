@@ -23,11 +23,11 @@ void LCD_Init_sequence();
 //Ypos: ordinate
 void LCD_SetCursor(u16 x, u16 y) {
     LCD_WR_REG(LCD_SET_X);
-    LCD_WR_DATA(x >> 8);
-    LCD_WR_DATA(x & (u16) 0XFF);
+    LCD_WR_DATA8(x >> 8);
+    LCD_WR_DATA8(x & (u16) 0XFF);
     LCD_WR_REG(LCD_SET_Y);
-    LCD_WR_DATA(y >> 8);
-    LCD_WR_DATA(y & (u16) 0XFF);
+    LCD_WR_DATA8(y >> 8);
+    LCD_WR_DATA8(y & (u16) 0XFF);
 }
 
 // Set the window, and automatically sets the upper left corner of the window to draw point coordinates (sx,sy).
@@ -36,23 +36,22 @@ void LCD_SetCursor(u16 x, u16 y) {
 // Form size:width*height.
 void LCD_Set_Window(u16 sx, u16 sy, u16 ex, u16 ey) {
     LCD_WR_REG(LCD_SET_X);
-    LCD_WR_DATA(sx >> 8);
-    LCD_WR_DATA(sx & (u16) 0XFF);
-    LCD_WR_DATA(ex >> 8);
-    LCD_WR_DATA(ex & (u16) 0XFF);
+    LCD_WR_DATA8(sx >> 8);
+    LCD_WR_DATA8(sx & (u16) 0XFF);
+    LCD_WR_DATA8(ex >> 8);
+    LCD_WR_DATA8(ex & (u16) 0XFF);
 
     LCD_WR_REG(LCD_SET_Y);
-    LCD_WR_DATA(sy >> 8);
-    LCD_WR_DATA(sy & (u16) 0XFF);
-    LCD_WR_DATA(ey >> 8);
-    LCD_WR_DATA(ey & (u16) 0XFF);
+    LCD_WR_DATA8(sy >> 8);
+    LCD_WR_DATA8(sy & (u16) 0XFF);
+    LCD_WR_DATA8(ey >> 8);
+    LCD_WR_DATA8(ey & (u16) 0XFF);
 }
 
 // Set up automatic scanning direction of the LCD
 // NOTE: Additional functions may be affected (especially in 9341/6804 these two wonderful) this function set,
 // So, generally set L2R_U2D can, if you set the scan mode to another may result in the display is not normal.
 //dir:0~7, representatives of eight directions (specifically defined lcd.h)
-//9320/9325/9328/4531/4535/1505/b505/8989/5408/9341/5310/5510 etc. IC has actually tested
 void LCD_Scan_Dir(u8 dir) {
     u16 regval = 0;
     u16 temp;
@@ -140,15 +139,15 @@ void LCD_Scan_Dir(u8 dir) {
     ysize = lcddev.height;
 
     LCD_WR_REG(LCD_SET_X);
-    LCD_WR_DATA(0);
-    LCD_WR_DATA(0);
-    LCD_WR_DATA((xsize - (u16) 1) >> 8);
-    LCD_WR_DATA((xsize - (u16) 1) & (u16) 0XFF);
+    LCD_WR_DATA8(0);
+    LCD_WR_DATA8(0);
+    LCD_WR_DATA8((xsize - (u16) 1) >> 8);
+    LCD_WR_DATA8((xsize - (u16) 1) & (u16) 0XFF);
     LCD_WR_REG(LCD_SET_Y);
-    LCD_WR_DATA(0);
-    LCD_WR_DATA(0);
-    LCD_WR_DATA((ysize - (u16) 1) >> 8);
-    LCD_WR_DATA((ysize - (u16) 1) & (u16) 0XFF);
+    LCD_WR_DATA8(0);
+    LCD_WR_DATA8(0);
+    LCD_WR_DATA8((ysize - (u16) 1) >> 8);
+    LCD_WR_DATA8((ysize - (u16) 1) & (u16) 0XFF);
 }
 
 // Draw points
@@ -171,11 +170,11 @@ void LCD_Fast_DrawPoint(u16 x, u16 y, u16 color) {
         return;
 
     LCD_WR_REG(LCD_SET_X);
-    LCD_WR_DATA(x >> 8);
-    LCD_WR_DATA(x & (u16) 0XFF);
+    LCD_WR_DATA8(x >> 8);
+    LCD_WR_DATA8(x & (u16) 0XFF);
     LCD_WR_REG(LCD_SET_Y);
-    LCD_WR_DATA(y >> 8);
-    LCD_WR_DATA(y & (u16) 0XFF);
+    LCD_WR_DATA8(y >> 8);
+    LCD_WR_DATA8(y & (u16) 0XFF);
 
     LCD_WriteRAM_Prepare();    // Start writing GRAM
     LCD_WR_DATA(color);
@@ -235,113 +234,113 @@ void LCD_Init(void) {
 
 void LCD_Init_sequence() {
     LCD_WR_REG(0xCF);  //  Power Control B
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0xC1);
-    LCD_WR_DATA(0x30);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0xC1);
+    LCD_WR_DATA8(0x30);
 
     LCD_WR_REG(0xED);  //  Power on Sequence control
-    LCD_WR_DATA(0x64);
-    LCD_WR_DATA(0x03);
-    LCD_WR_DATA(0x12);
-    LCD_WR_DATA(0x81);
+    LCD_WR_DATA8(0x64);
+    LCD_WR_DATA8(0x03);
+    LCD_WR_DATA8(0x12);
+    LCD_WR_DATA8(0x81);
 
     LCD_WR_REG(0xE8);  //  Driver timing control A
-    LCD_WR_DATA(0x85);
-    LCD_WR_DATA(0x10); // 00 - x10
-    LCD_WR_DATA(0x7A); // 78 - x7A
+    LCD_WR_DATA8(0x85);
+    LCD_WR_DATA8(0x10); // 00 - x10
+    LCD_WR_DATA8(0x7A); // 78 - x7A
 
     LCD_WR_REG(0xCB);   //  Power Control A
-    LCD_WR_DATA(0x39);
-    LCD_WR_DATA(0x2C);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x34);
-    LCD_WR_DATA(0x02);
+    LCD_WR_DATA8(0x39);
+    LCD_WR_DATA8(0x2C);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x34);
+    LCD_WR_DATA8(0x02);
 
     LCD_WR_REG(0xF7);   //  Pump ratio control
-    LCD_WR_DATA(0x20);
+    LCD_WR_DATA8(0x20);
 
     LCD_WR_REG(0xEA);   //  Driver timing control B
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
 
     LCD_WR_REG(0xC0);   //  Power Control 1
-    LCD_WR_DATA(0x1B); // VRH[5:0]  10 - 0x1B     !!!!!!! 3.65 V - 4.20 V
+    LCD_WR_DATA8(0x1B); // VRH[5:0]  10 - 0x1B     !!!!!!! 3.65 V - 4.20 V
 
     LCD_WR_REG(0xC1);   //  Power Control 2
-    LCD_WR_DATA(0x01); // SAP[2:0];BT[3:0]  10 - 01  !!!!!!!
+    LCD_WR_DATA8(0x01); // SAP[2:0];BT[3:0]  10 - 01  !!!!!!!
 
     LCD_WR_REG(0xC5);   //  VCOM Control 1
-    LCD_WR_DATA(0x30); // 3E - 30  /3F
-    LCD_WR_DATA(0x30); // 28 - 30  /3C
+    LCD_WR_DATA8(0x30); // 3E - 30  /3F
+    LCD_WR_DATA8(0x30); // 28 - 30  /3C
 
     LCD_WR_REG(0xC7);   //  VCOM Control 2
-    LCD_WR_DATA(0xB7); //  86 - B7 (86 - плохое качество)
+    LCD_WR_DATA8(0xB7); //  86 - B7 (86 - плохое качество)
 
     LCD_WR_REG(0x36);   // Memory Access Control
-    LCD_WR_DATA(0x48);
+    LCD_WR_DATA8(0x48);
 
     LCD_WR_REG(0x3A);   //  Pixel Format Set
-    LCD_WR_DATA(0x55); // 16bit
+    LCD_WR_DATA8(0x55); // 16bit
 
     LCD_WR_REG(0xB1);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x1A); // Частота кадров 79 Гц // 18 - 1A  79Hz - 73Hz
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x1A); // Частота кадров 79 Гц // 18 - 1A  79Hz - 73Hz
 
     LCD_WR_REG(0xB6);   // Display Function Control
-    LCD_WR_DATA(0x0A); // 08 - 0A
-    LCD_WR_DATA(0xA2); // 82 - A2
+    LCD_WR_DATA8(0x0A); // 08 - 0A
+    LCD_WR_DATA8(0xA2); // 82 - A2
     //LCD_WR_DATA8(0x27); //320 строк // отсутсвует
 
     LCD_WR_REG(0xF2);    //  3Gamma Function
-    LCD_WR_DATA(0x00);  // Disable
+    LCD_WR_DATA8(0x00);  // Disable
 
     LCD_WR_REG(0x26);    // Gamma curve selected
-    LCD_WR_DATA(0x01);  // Gamma Curve (G2.2) (Кривая цветовой гаммы)
+    LCD_WR_DATA8(0x01);  // Gamma Curve (G2.2) (Кривая цветовой гаммы)
 
     LCD_WR_REG(0xE0);    // Positive Gamma  Correction
-    LCD_WR_DATA(0x0F);
-    LCD_WR_DATA(0x2A);
-    LCD_WR_DATA(0x28);
-    LCD_WR_DATA(0x08);
-    LCD_WR_DATA(0x0E);
-    LCD_WR_DATA(0x08);
-    LCD_WR_DATA(0x54);
-    LCD_WR_DATA(0XA9);
-    LCD_WR_DATA(0x43);
-    LCD_WR_DATA(0x0A);
-    LCD_WR_DATA(0x0F);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
+    LCD_WR_DATA8(0x0F);
+    LCD_WR_DATA8(0x2A);
+    LCD_WR_DATA8(0x28);
+    LCD_WR_DATA8(0x08);
+    LCD_WR_DATA8(0x0E);
+    LCD_WR_DATA8(0x08);
+    LCD_WR_DATA8(0x54);
+    LCD_WR_DATA8(0XA9);
+    LCD_WR_DATA8(0x43);
+    LCD_WR_DATA8(0x0A);
+    LCD_WR_DATA8(0x0F);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
 
     LCD_WR_REG(0xE1);     // Negative Gamma  Correction
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x15);
-    LCD_WR_DATA(0x17);
-    LCD_WR_DATA(0x07);
-    LCD_WR_DATA(0x11);
-    LCD_WR_DATA(0x06);
-    LCD_WR_DATA(0x2B);
-    LCD_WR_DATA(0x56);
-    LCD_WR_DATA(0x3C);
-    LCD_WR_DATA(0x05);
-    LCD_WR_DATA(0x10);
-    LCD_WR_DATA(0x0F);
-    LCD_WR_DATA(0x3F);
-    LCD_WR_DATA(0x3F);
-    LCD_WR_DATA(0x0F);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x15);
+    LCD_WR_DATA8(0x17);
+    LCD_WR_DATA8(0x07);
+    LCD_WR_DATA8(0x11);
+    LCD_WR_DATA8(0x06);
+    LCD_WR_DATA8(0x2B);
+    LCD_WR_DATA8(0x56);
+    LCD_WR_DATA8(0x3C);
+    LCD_WR_DATA8(0x05);
+    LCD_WR_DATA8(0x10);
+    LCD_WR_DATA8(0x0F);
+    LCD_WR_DATA8(0x3F);
+    LCD_WR_DATA8(0x3F);
+    LCD_WR_DATA8(0x0F);
 
     LCD_WR_REG(0x2B);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x01);
-    LCD_WR_DATA(0x3f);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x01);
+    LCD_WR_DATA8(0x3f);
     LCD_WR_REG(0x2A);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0xef);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0x00);
+    LCD_WR_DATA8(0xef);
 
     LCD_WR_REG(0x11); // Exit Sleep
     delay_ms(120);
@@ -350,7 +349,6 @@ void LCD_Init_sequence() {
 
 // Clear screen function
 //color: To clear the screen fill color
-
 void LCD_Clear(u16 color) {
 //    clearScreen_dma(color);
 //    return;
@@ -358,11 +356,10 @@ void LCD_Clear(u16 color) {
     // get start time
     u32 t0 = DWT_Get_Current_Tick();
 
-    u32 totalPoints = lcddev.width * lcddev.height;  // get the total number of points
-
     LCD_SetCursor(0, 0);     // set the cursor position
     LCD_WriteRAM_Prepare();  // start writing GRAM
 
+    u32 totalPoints = lcddev.width * lcddev.height;  // get the total number of points
     for (u32 i = 0; i < totalPoints; i++) {
         LCD_WR_DATA(color);
     }
@@ -494,8 +491,8 @@ void LCD_Draw_Circle(u16 x0, u16 y0, u8 r) {
 void LCD_ShowChar(u16 x, u16 y, u8 num, u8 size, u8 mode) {
     u8 temp, t1, t;
     u16 y0 = y;
-    u8 csize = (size / 8 + ((size % 8) ? 1 : 0)) *
-               (size / 2); // get a font character set corresponding to the number of bytes occupied by a dot
+    // get a font character set corresponding to the number of bytes occupied by a dot
+    u8 csize = (size / 8 + ((size % 8) ? 1 : 0)) * (size / 2);
     // Setup Window
     num = num - ' ';// values obtained after offset
     for (t = 0; t < csize; t++) {
@@ -569,7 +566,6 @@ void LCD_ShowxNum(u16 x, u16 y, u32 num, u8 len, u8 size, u8 mode) {
                 else LCD_ShowChar(x + (size / 2) * t, y, ' ', size, mode & 0X01);
                 continue;
             } else enshow = 1;
-
         }
         LCD_ShowChar(x + (size / 2) * t, y, temp + '0', size, mode & 0X01);
     }
