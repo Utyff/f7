@@ -32,7 +32,7 @@ __STATIC_INLINE void LCD_WR_REG(vu16 regval) {
 }
 
 // for compatible with GPIO 8bit code. Used only for write registers data.
-__STATIC_INLINE void LCD_WR_DATA8(vu8 data) {
+__STATIC_INLINE void LCD_WR_DATA8(vu16 data) {
     LCD->LCD_RAM = data;
 }
 
@@ -49,7 +49,7 @@ __STATIC_INLINE u16 LCD_RD_DATA(void) {
 // Write register
 //LCD_Reg: Register Address
 //LCD_RegValue: data to be written
-__STATIC_INLINE void LCD_WriteReg(vu8 LCD_Reg, vu8 LCD_RegValue) {
+__STATIC_INLINE void LCD_WriteReg(vu16 LCD_Reg, vu16 LCD_RegValue) {
     LCD_WR_REG(LCD_Reg);         // Write to write register number
     LCD_WR_DATA8(LCD_RegValue);  // write data
 }

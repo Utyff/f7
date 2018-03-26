@@ -1,5 +1,6 @@
 #include <fmc_dma.h>
-#include "lcd.h"
+#include <lcd_fmc.h>
+#include <lcd.h>
 #include "font.h"
 #include "delay.h"
 
@@ -17,6 +18,10 @@ _lcd_dev lcddev;
 
 void LCD_Init_sequence();
 
+// Start writing GRAM
+__STATIC_INLINE void LCD_WriteRAM_Prepare(void) {
+    LCD_WR_REG(LCD_WR_RAM_CMD);
+}
 
 // Set the cursor position
 //Xpos: abscissa
@@ -224,7 +229,7 @@ void LCD_Init(void) {
 
     char buf[250];
     sprintf(buf, "\n LCD ID: %x\n", lcddev.id);
-    DBG_Trace((uint8_t*)buf);
+    DBG_Trace((uint8_t *) buf);
 
     LCD_Init_sequence();
 
@@ -356,8 +361,8 @@ void LCD_Clear(u16 color) {
     // get start time
     u32 t0 = DWT_Get_Current_Tick();
 
-    LCD_SetCursor(0, 0);     // set the cursor position
-    LCD_WriteRAM_Prepare();  // start writing GRAM
+    LCD_Set_Window(0, 0, MAX_X - 1, MAX_Y - 1);  // set the cursor position
+    LCD_WriteRAM_Prepare();                  // start writing GRAM
 
     u32 totalPoints = lcddev.width * lcddev.height;  // get the total number of points
     for (u32 i = 0; i < totalPoints; i++) {
@@ -370,7 +375,7 @@ void LCD_Clear(u16 color) {
 }
 
 // Fill a single color in the designated area
-//(sx,sy),(ex,ey): filled rectangle coordinates diagonal , area size:(ex-sx+1)*(ey-sy+1)
+//(sx,sy),(ex,ey): filled rectangle coordinates diagonal, area size:(ex-sx+1)*(ey-sy+1)
 //color: To fill color
 void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color) {
     u16 tmp;
@@ -390,15 +395,15 @@ void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color) {
 
 // In the designated area to fill the specified color block
 //(sx,sy),(ex,ey): filled rectangle coordinates diagonal, area size:(ex-sx+1)*(ey-sy+1)
-//color: To fill color
+//bmp: pointer to bmp array
 void LCD_drawBMP(u16 sx, u16 sy, u16 ex, u16 ey, const u16 *bmp) {
     u16 height, width;
     u16 i, j;
     width = ex - sx + (u16) 1;            // get filled width
     height = ey - sy + (u16) 1;           // height
     for (i = 0; i < height; i++) {
-        LCD_SetCursor(sx, sy + i);  // set the cursor position
-        LCD_WriteRAM_Prepare();     // start writing GRAM
+        LCD_SetCursor(sx, sy + i);    // set the cursor position
+        LCD_WriteRAM_Prepare();       // start writing GRAM
         for (j = 0; j < width; j++) { // write data
             LCD_WR_DATA(bmp[i * width + j]);
         }
@@ -562,12 +567,12 @@ void LCD_ShowxNum(u16 x, u16 y, u32 num, u8 len, u8 size, u8 mode) {
         temp = (num / LCD_Pow(10, len - t - 1)) % 10;
         if (enshow == 0 && t < (len - 1)) {
             if (temp == 0) {
-                if (mode & 0X80)LCD_ShowChar(x + (size / 2) * t, y, '0', size, mode & 0X01);
-                else LCD_ShowChar(x + (size / 2) * t, y, ' ', size, mode & 0X01);
+                if (mode & 0X80)LCD_ShowChar(x + (size / (u16) 2) * t, y, '0', size, mode & (u8) 0X01);
+                else LCD_ShowChar(x + (size / (u16) 2) * t, y, ' ', size, mode & (u8) 0X01);
                 continue;
             } else enshow = 1;
         }
-        LCD_ShowChar(x + (size / 2) * t, y, temp + '0', size, mode & 0X01);
+        LCD_ShowChar(x + (size / (u16) 2) * t, y, temp + (u8) '0', size, mode & (u8) 0X01);
     }
 }
 
