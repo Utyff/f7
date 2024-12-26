@@ -19,7 +19,7 @@ _lcd_dev lcddev;
 void LCD_Init_sequence();
 
 // Start writing GRAM
-__STATIC_INLINE void LCD_WriteRAM_Prepare(void) {
+__attribute__( ( always_inline ) ) __STATIC_INLINE void LCD_WriteRAM_Prepare(void) {
     LCD_WR_REG(LCD_WR_RAM_CMD);
 }
 

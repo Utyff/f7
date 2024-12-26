@@ -20,7 +20,7 @@ typedef struct
 // for A18 as command line for data command
 // Note that the STM32 will shift to the right one bit when set!
 // For F7 0x60000000 remap to 0xC0000000 for disable ARM Core cache.
-#if defined (STM32F765xx) || defined(STM32F746xx)
+#if defined (STM32F765xx) || defined(STM32F746xx) || defined(STM32H743xx)
 #define LCD_BASE        ((u32)(0xC0000000 | 0x00007FFFE))
 #else
 #define LCD_BASE        ((u32)(0x60000000 | 0x00007FFFE))
