@@ -1,46 +1,67 @@
-SET(CMAKE_SYSTEM_NAME Generic)
-SET(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 3.9)
+#THIS FILE IS AUTO GENERATED FROM THE TEMPLATE! DO NOT CHANGE!
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_VERSION 1)
+cmake_minimum_required(VERSION 3.30)
 
-# specify the cross compiler
-SET(CMAKE_C_COMPILER_WORKS 1)
-SET(CMAKE_C_COMPILER arm-none-eabi-gcc)
-SET(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(AS arm-none-eabi-as)
-set(AR arm-none-eabi-ar)
-set(OBJCOPY arm-none-eabi-objcopy)
-set(OBJDUMP arm-none-eabi-objdump)
+# specify cross-compilers and tools
+set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+set(CMAKE_ASM_COMPILER  arm-none-eabi-gcc)
+set(CMAKE_AR arm-none-eabi-ar)
+set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
+set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-
-SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F765VITx_FLASH.ld)
+# project settings
+project(f7 C CXX ASM)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 11)
 
 #Uncomment for hardware floating point
-SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
-add_definitions(-DARM_MATH_CM7 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING)
+#add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
+#add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
+#add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
 
 #Uncomment for software floating point
-#SET(FPU_FLAGS "-mfloat-abi=soft")
+#add_compile_options(-mfloat-abi=soft)
 
-SET(COMMON_FLAGS "-mcpu=cortex-m7 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections -g -fno-common -fmessage-length=0 -specs=nosys.specs -specs=nano.specs")
+add_compile_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
+add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
-SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
-SET(CMAKE_C_FLAGS_INIT "${COMMON_FLAGS} -std=gnu99")
-SET(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,-gc-sections -T ${LINKER_SCRIPT}")
+# uncomment to mitigate c++17 absolute addresses warnings
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-register")
 
-PROJECT(f7 C ASM)
-set(CMAKE_CXX_STANDARD 11)
+# Enable assembler files preprocessing
+add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
-#add_definitions(-DARM_MATH_CM7 -DARM_MATH_MATRIX_CHECK -DARM_MATH_ROUNDING -D__FPU_PRESENT=1)
-add_definitions(-D__weak=__attribute__\(\(weak\)\) -D__packed=__attribute__\(\(__packed__\)\) -DUSE_HAL_DRIVER -DSTM32F765xx )
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    message(STATUS "Maximum optimization for speed")
+    add_compile_options(-Ofast)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+    message(STATUS "Maximum optimization for speed, debug info included")
+    add_compile_options(-Ofast -g)
+elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+    message(STATUS "Maximum optimization for size")
+    add_compile_options(-Os)
+else ()
+    message(STATUS "Minimal optimization, debug info included")
+    add_compile_options(-Og -g)
+endif ()
 
-file(GLOB_RECURSE SOURCES "usr/src/*.*" "usr/inc/*.*" "startup/*.*" "Drivers/*.*" "Src/*.*" "Inc/*.*")
+include_directories(Inc usr/inc Drivers/STM32F7xx_HAL_Driver/Inc Drivers/STM32F7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F7xx/Include Drivers/CMSIS/Include)
 
-include_directories(usr/inc Inc Drivers/STM32F7xx_HAL_Driver/Inc Drivers/STM32F7xx_HAL_Driver/Inc/Legacy Drivers/CMSIS/Device/ST/STM32F7xx/Include Drivers/CMSIS/Include)
+add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F765xx)
+
+file(GLOB_RECURSE SOURCES "Startup/*.*" "Src/*.*" "usr/src/*.*" "Drivers/*.*")
+
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F765VITX_FLASH.ld)
+
+add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
+add_link_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
+add_link_options(-T ${LINKER_SCRIPT})
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
-
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map")
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
@@ -50,9 +71,3 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")
-
-add_custom_target(UPLOAD
-        arm-none-eabi-gdb -iex "target remote tcp:127.0.0.1:3333"
-        -iex "monitor program $<TARGET_FILE:${PROJECT_NAME}.elf>"
-        -iex "monitor reset init"
-        -iex "disconnect" -iex "quit")

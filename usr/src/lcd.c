@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <fmc_dma.h>
 #include <lcd_fmc.h>
 #include <lcd.h>
